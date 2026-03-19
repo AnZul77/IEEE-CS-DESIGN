@@ -1,10 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-background: #f2f1eb;
+  --color-ieee-yellow: #f5a623;
+  --color-ieee-dark: #1a1a1a;
+  --color-ieee-navbar: #2a2a2a;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
 
 @layer base {
   body {
-    @apply bg-background text-ieee-dark overflow-x-hidden;
+    background-color: var(--color-background);
+    color: var(--color-ieee-dark);
+    overflow-x: hidden;
   }
 }
 
