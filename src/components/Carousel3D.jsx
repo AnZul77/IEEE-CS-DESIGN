@@ -211,7 +211,7 @@ export default function Carousel3D({ className }) {
         <pointLight position={[-10, -10, -10]} intensity={1} />
 
         <Suspense fallback={null}>
-          <group position={[0, 0, 0]} rotation={[0, 0, 0.55]}>
+          <group position={[-0.05, -0.1, 0]} rotation={[0, 0, 0.55]}>
             <Rig
               radius={2} // Tighter radius
               count={CARDS.length}
