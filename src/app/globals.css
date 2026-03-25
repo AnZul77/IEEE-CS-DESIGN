@@ -3,21 +3,142 @@
 @theme {
   --color-background: #f2f1eb;
   --color-ieee-yellow: #f5a623;
+  --color-ieee-gold: #f8a519;
   --color-ieee-dark: #1a1a1a;
   --color-ieee-navbar: #2a2a2a;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-ieee-dark);
-    overflow-x: hidden;
   }
+
+  .snap-section {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    width: 100vw;
+  }
+}
+
+/* Custom premium ease */
+:root {
+  --ease-premium: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /* Hide scrollbar for clean UI */
 ::-webkit-scrollbar {
   width: 0px;
   background: transparent;
+}
+
+/* Stick Figure Idle Animations */
+@keyframes figure-wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-15deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  75% {
+    transform: rotate(-10deg);
+  }
+}
+
+@keyframes figure-check-watch {
+  0%,
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  30% {
+    transform: rotate(-30deg) translateY(-2px);
+  }
+  60% {
+    transform: rotate(-25deg) translateY(-2px);
+  }
+}
+
+@keyframes figure-sit {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+  100% {
+    transform: translateY(5px);
+  }
+}
+
+@keyframes figure-breathe {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.02);
+  }
+}
+
+/* Harp line glow */
+@keyframes harp-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px rgba(248, 165, 25, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(248, 165, 25, 0.6));
+  }
+}
+
+/* Grid cell hover */
+.grid-cell {
+  transition:
+    transform 0.3s var(--ease-premium),
+    background-color 0.3s var(--ease-premium);
+}
+
+.grid-cell:hover {
+  transform: scale(1.15) rotate(5deg);
+  background-color: rgba(0, 43, 84, 0.8);
+}
+
+/* Vortex grid animation */
+@keyframes vortex-expand {
+  from {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  to {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/* Portfolio carousel */
+.carousel-track {
+  display: flex;
+  gap: 2rem;
+  will-change: transform;
+}
+
+/* Pin spacer fix */
+.pin-spacer {
+  overflow: visible !important;
 }
