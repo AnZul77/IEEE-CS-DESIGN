@@ -194,13 +194,30 @@ function Rig({ radius = 4, count = 6, children, isPaused }) {
 export default function Carousel3D({ className }) {
   const [hovered, setHovered] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const selectedItem = CARDS.find((item) => item.id === selectedId);
 
   return (
     <div className={`w-full h-full relative overflow-hidden ${className}`}>
       {/* 3D Scene */}
-      <Canvas camera={{ position: [0, 0, 8], fov: 35 }}>
+      <Canvas
+        camera={{
+          position: [0, 0, isMobile ? 12 : 8],
+          fov: isMobile ? 45 : 35,
+        }}
+      >
         <ambientLight intensity={1.5} />
         <spotLight
           position={[10, 10, 10]}
@@ -211,7 +228,11 @@ export default function Carousel3D({ className }) {
         <pointLight position={[-10, -10, -10]} intensity={1} />
 
         <Suspense fallback={null}>
-          <group position={[-0.05, -0.1, 0]} rotation={[0, 0, 0.55]}>
+          <group
+            position={[-0.05, -0.1, 0]}
+            rotation={[0, 0, 0.55]}
+            scale={isMobile ? 0.45 : isTablet ? 0.65 : 1}
+          >
             <Rig
               radius={2} // Tighter radius
               count={CARDS.length}
