@@ -16,6 +16,8 @@ export default function StickFigure() {
   const [currentIdle, setCurrentIdle] = useState<IdleAnimation>("breathe");
   const idleTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const armRef = useRef<SVGGElement>(null);
+  const leftLegRef = useRef<SVGGElement>(null);
+  const rightLegRef = useRef<SVGGElement>(null);
 
   const startIdleAnimations = useCallback(() => {
     if (idleTimerRef.current) clearInterval(idleTimerRef.current);
@@ -42,13 +44,13 @@ export default function StickFigure() {
     const container = containerRef.current;
     if (!figure || !container) return;
 
-    // Initial position: hanging from navbar bottom
+    // Initial position: hanging from navbar bottom (Centered)
     gsap.set(container, {
       position: "fixed",
       top: "75px",
-      right: "140px",
-      left: "auto",
-      xPercent: 0,
+      left: "50%",
+      right: "auto",
+      xPercent: -50,
       zIndex: 100, // Globally high z-index to overlay all pages
       opacity: 1,
     });
@@ -94,10 +96,32 @@ export default function StickFigure() {
             }).to(figure, {
               scaleY: 1,
               scaleX: 1,
-              duration: 0.4,
+              duration: 0.3,
               ease: "elastic.out(1, 0.3)",
-              onComplete: startIdleAnimations
             });
+
+            // The Scurry! Run to the right side (Slower & Leg Animated)
+            tl.to(figure, { rotation: 12, transformOrigin: "bottom center", duration: 0.1 }, "+=0.05")
+              .to(container, {
+                x: window.innerWidth / 2 - 100, // Move to right side
+                duration: 1.2,
+                ease: "power1.inOut"
+              }, "<")
+              .to(figure, { 
+                y: -10, 
+                duration: 0.15, 
+                yoyo: true, 
+                repeat: 7,
+                ease: "sine.inOut"
+              }, "<")
+              .to(leftLegRef.current, { rotation: 15, transformOrigin: "25px 48px", duration: 0.15, yoyo: true, repeat: 7, ease: "sine.inOut" }, "<")
+              .to(rightLegRef.current, { rotation: -15, transformOrigin: "25px 48px", duration: 0.15, yoyo: true, repeat: 7, ease: "sine.inOut" }, "<")
+              .to([figure, leftLegRef.current, rightLegRef.current], {
+                rotation: 0,
+                y: 0,
+                duration: 0.15,
+                onComplete: startIdleAnimations
+              });
           }
         } else {
           // He is actively holding/scrubbing the rip down
@@ -109,8 +133,11 @@ export default function StickFigure() {
             setLandedState(false);
             hasBeenDraggedRef.current = false; // Reset drag override so he snaps back to the rip
             gsap.killTweensOf(figure);
-            gsap.set(figure, { scaleY: 1, scaleX: 1 });
-            gsap.to(container, { scale: 1, duration: 0.2 }); // Reset scale just in case
+            gsap.killTweensOf(container);
+            gsap.killTweensOf([leftLegRef.current, rightLegRef.current]);
+            gsap.set(figure, { scaleY: 1, scaleX: 1, rotation: 0, y: 0 });
+            gsap.set([leftLegRef.current, rightLegRef.current], { rotation: 0 });
+            gsap.to(container, { x: 0, scale: 1, duration: 0.2 }); // Reset x to center so he rides the rip up again!
             if (idleTimerRef.current) clearInterval(idleTimerRef.current);
           }
         }
@@ -146,6 +173,13 @@ export default function StickFigure() {
     e.currentTarget.setPointerCapture(e.pointerId);
     setIsDragging(true);
     hasBeenDraggedRef.current = true;
+    
+    // Interrupt any ongoing scurry or idle animations
+    gsap.killTweensOf(figureRef.current);
+    gsap.killTweensOf(containerRef.current);
+    gsap.killTweensOf([leftLegRef.current, rightLegRef.current]);
+    gsap.set(figureRef.current, { rotation: 0, y: 0 }); // reset scurry states
+    gsap.set([leftLegRef.current, rightLegRef.current], { rotation: 0 });
     
     if (idleTimerRef.current) clearInterval(idleTimerRef.current);
     setCurrentIdle("wave"); 
@@ -234,13 +268,17 @@ export default function StickFigure() {
           )}
         </g>
 
-        {/* Legs */}
-        <line x1="25" y1="48" x2={isDragging ? "10" : "15"} y2={isDragging ? "65" : (hasFallen && !landed ? "75" : "68")} stroke="#ff9500ff" strokeWidth="2.5" strokeLinecap="round" style={{ transition: "all 0.2s" }} />
-        <line x1="25" y1="48" x2={isDragging ? "40" : "35"} y2={isDragging ? "65" : (hasFallen && !landed ? "75" : "68")} stroke="#ff9500ff" strokeWidth="2.5" strokeLinecap="round" style={{ transition: "all 0.2s" }} />
+        {/* Left Leg & Foot */}
+        <g ref={leftLegRef}>
+          <line x1="25" y1="48" x2={isDragging ? "10" : "15"} y2={isDragging ? "65" : (hasFallen && !landed ? "75" : "68")} stroke="#ff9500ff" strokeWidth="2.5" strokeLinecap="round" style={{ transition: "all 0.2s" }} />
+          <line x1={isDragging ? "10" : "15"} y1={isDragging ? "65" : (hasFallen && !landed ? "75" : "68")} x2={isDragging ? "5" : "10"} y2={isDragging ? "60" : "72"} stroke="#ff9500ff" strokeWidth="2.5" strokeLinecap="round" style={{ opacity: (hasFallen && !landed && !isDragging) ? 0 : 1, transition: "opacity 0.2s, all 0.2s" }} />
+        </g>
 
-        {/* Feet */}
-        <line x1={isDragging ? "10" : "15"} y1={isDragging ? "65" : (hasFallen && !landed ? "75" : "68")} x2={isDragging ? "5" : "10"} y2={isDragging ? "60" : "72"} stroke="#ff9500ff" strokeWidth="2.5" strokeLinecap="round" style={{ opacity: (hasFallen && !landed && !isDragging) ? 0 : 1, transition: "opacity 0.2s, all 0.2s" }} />
-        <line x1={isDragging ? "40" : "35"} y1={isDragging ? "65" : (hasFallen && !landed ? "75" : "68")} x2={isDragging ? "45" : "40"} y2={isDragging ? "60" : "72"} stroke="#ff9500ff" strokeWidth="2.5" strokeLinecap="round" style={{ opacity: (hasFallen && !landed && !isDragging) ? 0 : 1, transition: "opacity 0.2s, all 0.2s" }} />
+        {/* Right Leg & Foot */}
+        <g ref={rightLegRef}>
+          <line x1="25" y1="48" x2={isDragging ? "40" : "35"} y2={isDragging ? "65" : (hasFallen && !landed ? "75" : "68")} stroke="#ff9500ff" strokeWidth="2.5" strokeLinecap="round" style={{ transition: "all 0.2s" }} />
+          <line x1={isDragging ? "40" : "35"} y1={isDragging ? "65" : (hasFallen && !landed ? "75" : "68")} x2={isDragging ? "45" : "40"} y2={isDragging ? "60" : "72"} stroke="#ff9500ff" strokeWidth="2.5" strokeLinecap="round" style={{ opacity: (hasFallen && !landed && !isDragging) ? 0 : 1, transition: "opacity 0.2s, all 0.2s" }} />
+        </g>
 
         {/* Hanging rope */}
         {!hasFallen && (
